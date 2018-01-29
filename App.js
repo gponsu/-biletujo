@@ -1,23 +1,41 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { connect, Provider } from 'react-redux';
+import { combineReducers, createStore } from 'redux';
+import { addNavigationHelpers } from 'react-navigation';
 
-export default class App extends React.Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Text>Changes you make will automatically reload.</Text>
-        <Text>Shake your phone to open the developer menu.</Text>
-      </View>
-    );
-  }
-}
+import Navigator from './screens/Navigator';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+const navReducer = (state, action) => {
+  const nextState = Navigator.router.getStateForAction(action, state);
+
+  return nextState || state;
+};
+
+const appReducer = combineReducers({
+  nav: navReducer,
 });
+
+const store = createStore(appReducer);
+
+const mapStateToProps = (state) => ({
+  nav: state.nav
+});
+
+const Root = ({ dispatch, nav }) => {
+  return (
+    <Navigator navigation={addNavigationHelpers({
+      dispatch: dispatch,
+      state: nav,
+    })} />
+  );
+};
+
+const AppWithNavigationState = connect(mapStateToProps)(Root);
+
+export default App = () => {
+  return (
+    <Provider store={store}>
+      <AppWithNavigationState />
+    </Provider>
+  );
+};
